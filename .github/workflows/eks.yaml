@@ -1,0 +1,33 @@
+name: Deploy to Amazon EKS
+
+on: workflow_dispatch
+
+env:
+  EKS_CLUSTER_NAME: private-cluster-114033
+  AWS_REGION: us-east-2
+
+jobs:
+  build:
+    name: Deplyoment
+    runs-on: ubuntu:latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+    
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{env.AWS_REGION}}
+      - name: Update kube config
+        run: aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
+
+      - name: Deploy to EKS
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}        
+          IMAGE_TAG: ${{ steps.commit.outputs.short }}
+        run: |
+          kubectl apply -f manifests/hello-app-deployment.yaml
+          kubectl apply -f manifests/hello-app-service.yaml  
