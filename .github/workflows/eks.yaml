@@ -4,7 +4,7 @@ on: workflow_dispatch
 
 env:
   EKS_CLUSTER_NAME: private-cluster-114033
-  #AWS_REGION: us-east-2
+  AWS_REGION: ${{vars.AWS_REGION}}
 
 jobs:
   build:
@@ -20,7 +20,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{vars.AWS_REGION}}
+          aws-region: ${{env.AWS_REGION}}
       - name: printe details     
         run: aws sts get-caller-identity  
       - name: Update kube config
